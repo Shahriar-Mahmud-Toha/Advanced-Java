@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE web-app
+        PUBLIC "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN"
+        "http://java.sun.com/dtd/web-app_2_3.dtd">
+
+<web-app>
+    <display-name>Sample Page</display-name>
+    <description>
+        Admin: Md. Shahriar Mahmud
+        Email: 21-44498-1@student.aiub.edu
+    </description>
+    <servlet>
+        <servlet-name>Sample Page</servlet-name>
+        <servlet-class>SamplePage</servlet-class>
+
+        <load-on-startup>5</load-on-startup>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>Sample Page</servlet-name>
+        <url-pattern>/samplepage</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>Dashboard</servlet-name>
+        <servlet-class>Dashboard</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>Dashboard</servlet-name>
+        <url-pattern>/dashboard</url-pattern>
+    </servlet-mapping>
+</web-app>
