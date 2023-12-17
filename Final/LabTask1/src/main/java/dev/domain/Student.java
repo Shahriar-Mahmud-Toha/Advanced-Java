@@ -1,30 +1,68 @@
 package dev.domain;
-
-import org.hibernate.validator.constraints.Length;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Past;
-import javax.validation.constraints.Pattern;
-import javax.validation.constraints.Size;
+import javax.persistence.*;
+import javax.servlet.http.HttpSession;
+import javax.validation.constraints.*;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-
+@Entity
+@Table(name = "studenttb")
 public class Student {
+    @javax.persistence.Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "Id")
+    @NotNull
     private int Id;
+    @NotNull
+    @Size(max = 100)
+    @Column(name = "name")
     private String name;
+    @NotNull
+    @Size(max = 100)
+    @Pattern(regexp = "^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\\.[a-zA-Z0-9-]+)*$", message = "Incorrect email format")
+    @Column(name = "email")
     private String email;
+    @NotNull
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+    @Column(name = "dateOfBirth")
     private LocalDate dateOfBirth;
+    @AssertTrue(message = "Age must be greater than or equal to 18")
+
+    boolean isDateOfBirthValid() {
+        if (dateOfBirth == null) {
+            return false;  // Return false if dateOfBirth is null
+        }
+
+        LocalDate currentDate = LocalDate.now();
+        LocalDate eighteenYearsAgo = currentDate.minusYears(18);
+        boolean flag = dateOfBirth.isBefore(eighteenYearsAgo) || dateOfBirth.equals(eighteenYearsAgo);
+
+        HttpSession session = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes())
+                .getRequest().getSession();
+
+        if (!flag) {
+            session.setAttribute("dateOfBirthValidationMsg", "Date of birth must be greater than or equal to 18");
+        }else {
+            session.setAttribute("dateOfBirthValidationMsg", "");
+        }
+        return flag;
+    }
+    @NotNull
+    @Column(name = "gender")
     private Gender gender;
-    private String quota;
+    @Column(name = "quota")
+    private String quota = "N/A";
+    @NotNull
+    @Column(name = "country")
     private String country;
 
     public Student() {
     }
 
-    public Student(int id, String name, String email, LocalDate dateOfBirth, Gender gender, String quota, String country) {
-        Id = id;
+    // Constructor excluding ID
+    public Student(String name, String email, LocalDate dateOfBirth, Gender gender, String quota, String country) {
         this.name = name;
         this.email = email;
         this.dateOfBirth = dateOfBirth;
@@ -32,20 +70,15 @@ public class Student {
         this.quota = quota;
         this.country = country;
     }
-// Overloaded Constructor for retrieval from database
-    public Student(int id, String name, String email, LocalDate dateOfBirth, String gender, String quota, String country) {
-        Id = id;
-        this.name = name;
-        this.email = email;
-        this.dateOfBirth = dateOfBirth;
-        if(gender.equals(Gender.MALE.toString())){
-            this.gender = Gender.MALE;
-        }
-        else{
-            this.gender = Gender.FEMALE;
-        }
-        this.quota = quota;
-        this.country = country;
+    //without ID
+    public Student(int id, String name, String email, LocalDate dateOfBirth, Gender gender, String quota, String country) {
+    this.Id = id;
+    this.name = name;
+    this.email = email;
+    this.dateOfBirth = dateOfBirth;
+    this.gender = gender;
+    this.quota = quota;
+    this.country = country;
     }
 
     public int getId() {

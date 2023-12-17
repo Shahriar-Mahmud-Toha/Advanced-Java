@@ -1,14 +1,12 @@
 package dev.repository;
-
-import dev.domain.Gender;
+import dev.controller.StudentController;
 import dev.domain.Student;
-import dev.domain.User;
-import org.springframework.stereotype.Controller;
 import org.springframework.stereotype.Repository;
 
 import javax.sql.DataSource;
 import java.sql.*;
-import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Repository
 public class StudentRepository {
@@ -43,17 +41,38 @@ public class StudentRepository {
         preparedStatement.execute();
     }
 
-    public Student get(int Id) throws SQLException {
+    public Student get(int id) throws SQLException {
         Connection connection = dataSource.getConnection();
         PreparedStatement preparedStatement = connection.prepareStatement("SELECT Id, name, email, dateOfBirth, gender, quota, country FROM studenttb WHERE Id = ?");
-        preparedStatement.setInt(1, Id);
+        preparedStatement.setInt(1, id);
+        ResultSet resultSet = preparedStatement.executeQuery();
+
+        if (resultSet.next()) {
+            return new Student(
+                    resultSet.getInt("Id"),
+                    resultSet.getString("name"),
+                    resultSet.getString("email"),
+                    resultSet.getDate("dateOfBirth").toLocalDate(),
+                    StudentController.ConvertToGender(resultSet.getString("gender")),
+                    resultSet.getString("quota"),
+                    resultSet.getString("country")
+            );
+        } else {
+            return null;
+        }
+    }
+
+    public List<Student> getAll() throws SQLException {
+        List<Student> students = new ArrayList<>();
+        Connection connection = dataSource.getConnection();
+        PreparedStatement preparedStatement = connection.prepareStatement("SELECT Id, name, email, dateOfBirth, gender, quota, country FROM studenttb");
         ResultSet resultSet = preparedStatement.executeQuery();
         while (resultSet.next()) {
-            return new Student(resultSet.getInt("Id"), resultSet.getString("name"), resultSet.getString("email"), resultSet.getDate("dateOfBirth").toLocalDate(),resultSet.getString("gender"), resultSet.getString("quota"), resultSet.getString("country"));
+            students.add(new Student(resultSet.getInt("Id"), resultSet.getString("name"), resultSet.getString("email"), resultSet.getDate("dateOfBirth").toLocalDate(), StudentController.ConvertToGender(resultSet.getString("gender")), resultSet.getString("quota"), resultSet.getString("country")));
         }
-        return new Student();
+        return students;
     }
-    public Boolean Delete(int Id) throws SQLException {
+    public boolean Delete(int Id) throws SQLException {
         Connection connection = dataSource.getConnection();
         PreparedStatement preparedStatement = connection.prepareStatement("delete from studenttb where Id = ?");
         preparedStatement.setInt(1, Id);
